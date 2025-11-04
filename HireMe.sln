@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HireMe", "HireMe\HireMe.csproj", "{B7A23DA0-B624-AD81-0333-315A0D011EEC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		IL2CPP|Any CPU = IL2CPP|Any CPU
+		IL2CPP|x64 = IL2CPP|x64
+		MONO|Any CPU = MONO|Any CPU
+		MONO|x64 = MONO|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.IL2CPP|Any CPU.ActiveCfg = IL2CPP|Any CPU
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.IL2CPP|Any CPU.Build.0 = IL2CPP|Any CPU
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.IL2CPP|x64.ActiveCfg = IL2CPP|x64
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.IL2CPP|x64.Build.0 = IL2CPP|x64
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.MONO|Any CPU.ActiveCfg = MONO|Any CPU
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.MONO|Any CPU.Build.0 = MONO|Any CPU
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.MONO|x64.ActiveCfg = MONO|x64
+		{B7A23DA0-B624-AD81-0333-315A0D011EEC}.MONO|x64.Build.0 = MONO|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7A953D9-ECC3-486F-AA11-E3EB01FB1A2B}
+	EndGlobalSection
+EndGlobal

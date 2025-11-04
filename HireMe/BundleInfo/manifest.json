@@ -1,0 +1,9 @@
+{
+	"name": "HireMe",
+	"version_number": "2.0.0",
+	"description": "Hire Me gives you access to manny's network by providing a User Interface for hiring employees",
+	"website_url": "",
+	"dependencies": [
+		"LavaGang-MelonLoader-0.7.0"
+	]
+}
