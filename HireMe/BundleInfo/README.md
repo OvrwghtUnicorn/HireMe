@@ -19,6 +19,12 @@ Hire Me gives you access to manny's network by providing a User Interface for hi
 # How to configure?
 Phone application visiblity can be configured via the MelonPrefences.cfg file located under the UserData directory in the root game folder. In the file you will find an attribute labeled `EnablePhoneApp`. `true` enables the phone app and `false` disables the phone app
 
+# Future Updates
+- Add support for [Ultimate Employees](https://www.nexusmods.com/schedule1/mods/1185)
+- Make the UI resizable for ultra wide monitors
+- Make the icons smaller
+- Add names to the hired employee icons to make it clear who you are firing
+
 # Found a Bug?
 Contact me on [Nexus](https://next.nexusmods.com/profile/OverweightUnicorn)
 

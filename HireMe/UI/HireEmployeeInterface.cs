@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using Unity.Collections;
 using UnityEngine.InputSystem;
 
+
 #if IL2CPP
 using Il2CppScheduleOne;
 using Il2CppScheduleOne.UI;
@@ -23,6 +24,7 @@ using Il2CppScheduleOne.Variables;
 using Il2CppScheduleOne.UI.Phone;
 using Il2CppSystem.Drawing;
 using Il2CppScheduleOne.UI.Items;
+using Il2CppInterop.Runtime.Attributes;
 #elif MONO
 using ScheduleOne;
 using ScheduleOne.UI;
@@ -67,6 +69,7 @@ namespace HireMe.UI {
         public Text errorLabel;
         public UnityAction onClose;
 
+        private bool _isHiringDone = false;
         private bool isMobile = false;
         private bool showMiscUI = false;
         private string shopName = "MannysNetwork";
@@ -534,13 +537,22 @@ namespace HireMe.UI {
             return total;
         }
 
-        public void HandlePaymentClick() {
+        public void HandlePaymentClick()
+        {
+            if (isHandlingPayment) return;
+            StartHandlePayment();
+        }
+
+        public void StartHandlePayment()
+        {
             if (isHandlingPayment) return;
             isHandlingPayment = true;
+            _isHiringDone = false;
+
 #if IL2CPP
-            MelonCoroutines.Start(HandlePayment((Action)HandlePaymentComplete));
+            MelonCoroutines.Start(HandlePaymentRoutine());
 #else
-            StartCoroutine(HandlePayment(HandlePaymentComplete));
+    StartCoroutine(HandlePaymentRoutine());
 #endif
         }
 
@@ -563,18 +575,20 @@ namespace HireMe.UI {
             cleanerListing.SetCountText(0);
             this.SetIsOpen(false);
         }
-
-        public IEnumerator HandlePayment(Action OnComplete = null) {
-            if (payButton == null) {
+#if IL2CPP
+        [HideFromIl2Cpp]
+#endif
+        public IEnumerator HandlePaymentRoutine() {
+            if (payButton == null) { 
                 MelonLogger.Error("payButton is null.");
-                OnComplete?.Invoke();
+                HandlePaymentComplete();
                 yield break;
             }
 
-            Text payButtonText = payButton.GetComponentInChildren<Text>();
-            if (payButtonText == null) {
+            var payButtonText = payButton.GetComponentInChildren<Text>();
+            if (payButtonText == null) { 
                 MelonLogger.Error("payButtonText is null.");
-                OnComplete?.Invoke();
+                HandlePaymentComplete();
                 yield break;
             }
 
@@ -582,17 +596,16 @@ namespace HireMe.UI {
             string baseText = "Processing";
             int dotCount = 0;
             float interval = 0.3f;
-            bool isHiringDone = false;
 
-            if (this != null) {
-                MelonCoroutines.Start(HireEmployees(() => isHiringDone = true));
-            } else {
-                MelonLogger.Error("HireEmployeeInterface is null while starting HireEmployees.");
-                OnComplete?.Invoke();
-                yield break;
-            }
+            _isHiringDone = false;
+#if IL2CPP
+            MelonCoroutines.Start(HireEmployeesRoutine());
+#else
+    StartCoroutine(HireEmployeesRoutine());
+#endif
 
-            while (!isHiringDone) {
+            while (!_isHiringDone)
+            {
                 if (payButtonText != null)
                     payButtonText.text = baseText + new string('.', dotCount);
                 dotCount = (dotCount + 1) % 3;
@@ -622,10 +635,13 @@ namespace HireMe.UI {
 
             }
 
-            OnComplete?.Invoke();
+            HandlePaymentComplete();
         }
 
-        private IEnumerator HireEmployees(Action onComplete) {
+#if IL2CPP
+        [HideFromIl2Cpp]
+#endif
+        private IEnumerator HireEmployeesRoutine() {
             if (!NetworkSingleton<VariableDatabase>.Instance.GetValue<bool>("ClipboardAcquired")) {
                 NetworkSingleton<VariableDatabase>.Instance.SetVariableValue("ClipboardAcquired", true.ToString(), true);
             }
@@ -635,6 +651,7 @@ namespace HireMe.UI {
                 List<DraggableItem> employees = kvp.Value;
 
                 foreach (var employee in employees) {
+                    if (employee == null) continue;
                     if (employee.newlySpawned) {
                         var type = employee.employeeType;
                         var stats = employeeStats[type];
@@ -652,7 +669,7 @@ namespace HireMe.UI {
                 }
             }
 
-            onComplete?.Invoke();
+            _isHiringDone = true;
         }
 
         void Update() {

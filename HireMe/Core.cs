@@ -35,7 +35,7 @@ namespace HireMe {
         public const string Description = "A user interface for hiring employees";
         public const string Author = "OverweightUnicorn";
         public const string Company = "UnicornsCanMod";
-        public const string Version = "2.0.0";
+        public const string Version = "2.1.0";
         public const string DownloadLink = null;
     }
     public class Core : MelonMod {

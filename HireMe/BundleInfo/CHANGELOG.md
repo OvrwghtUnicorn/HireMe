@@ -1,3 +1,7 @@
+# Version 2.1.0
+- Fixed error resulting in UI not launching from either the phone app or when talking to Manny
+- Updated the Enumerators to be called from seperate methods, fixing the error getting thrown related to System.Collections.IEnumerator type not being supported
+
 # Version 2.0.0
 - Hiring Interface shows currently hired employees
 - Now you can fire employees from the UI

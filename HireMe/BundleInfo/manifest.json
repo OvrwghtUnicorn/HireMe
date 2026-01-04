@@ -1,6 +1,6 @@
 {
 	"name": "HireMe",
-	"version_number": "2.0.0",
+	"version_number": "2.1.0",
 	"description": "Hire Me gives you access to manny's network by providing a User Interface for hiring employees",
 	"website_url": "",
 	"dependencies": [
