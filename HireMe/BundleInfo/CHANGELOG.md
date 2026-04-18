@@ -1,3 +1,8 @@
+# Version 2.2.0
+- Updated to work with latest version of the game.
+- Stores no longer minimize when at max capacity
+- Added names to the currently hired employees
+
 # Version 2.1.0
 - Fixed error resulting in UI not launching from either the phone app or when talking to Manny
 - Updated the Enumerators to be called from seperate methods, fixing the error getting thrown related to System.Collections.IEnumerator type not being supported

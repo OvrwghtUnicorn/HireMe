@@ -6,7 +6,7 @@ namespace HireMe.Utils {
         public static MelonPreferences_Entry<bool> EnablePhoneApp;
 
         public static void Init() {
-            MainCategory = MelonPreferences.CreateCategory("HireMe_01_Main", "Main Settings");
+            MainCategory = MelonPreferences.CreateCategory("Hire Me");
 
             EnablePhoneApp = MainCategory.CreateEntry(
                 "EnablePhoneApp",

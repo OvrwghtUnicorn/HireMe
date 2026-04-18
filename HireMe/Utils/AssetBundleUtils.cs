@@ -10,13 +10,19 @@ namespace HireMe.TemplateUtils
 {
     public static class AssetBundleUtils
     {
-        static Core mod = MelonAssembly.FindMelonInstance<Core>();
-        static MelonAssembly melonAssembly = mod.MelonAssembly;
-        static Dictionary<string,AssetBundle> assetBundles = new Dictionary<string,AssetBundle>();
+        static Core mod;
+        static MelonAssembly melonAssembly;
+        static Dictionary<string, AssetBundle> assetBundles = new Dictionary<string, AssetBundle>();
+
+        public static void Initialize(Core coreMod)
+        {
+            mod = coreMod;
+            melonAssembly = mod.MelonAssembly;
+        }
 
         public static AssetBundle LoadAssetBundle(string bundleFileName)
         {
-            if(assetBundles.ContainsKey(bundleFileName)) { return assetBundles[bundleFileName]; }
+            if (assetBundles.ContainsKey(bundleFileName)) { return assetBundles[bundleFileName]; }
             try
             {
                 string streamPath = $"{typeof(Core).Namespace}.Assets.{bundleFileName}";
@@ -34,13 +40,16 @@ namespace HireMe.TemplateUtils
                     bundleData = ms.ToArray();
                 }
                 Il2CppSystem.IO.Stream stream = new Il2CppSystem.IO.MemoryStream(bundleData);
+
                 AssetBundle ab = Il2CppAssetBundleManager.LoadFromStream(stream);
 #elif MONO
                 AssetBundle ab = AssetBundle.LoadFromStream(bundleStream);
 #endif
+
                 assetBundles.Add(bundleFileName, ab);
                 return ab;
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 mod.Unregister($"Failed to load AssetBundle. Please report to dev: {e}");
                 return null;
@@ -49,23 +58,29 @@ namespace HireMe.TemplateUtils
 
         public static AssetBundle GetLoadedAssetBundle(string bundleName)
         {
-            if(assetBundles.ContainsKey(bundleName)) { 
-                return assetBundles[bundleName]; 
-            } else {
+            if (assetBundles.ContainsKey(bundleName))
+            {
+                return assetBundles[bundleName];
+            }
+            else
+            {
                 mod.Unregister($"Failed to get {bundleName}");
                 throw new Exception($"Asset '{bundleName}' has not been loaded in yet");
             }
         }
 
-        public static T LoadAssetFromBundle<T>(string assetName, string bundleName) where T : UnityEngine.Object {
+        public static T LoadAssetFromBundle<T>(string assetName, string bundleName) where T : UnityEngine.Object
+        {
             var bundle = GetLoadedAssetBundle(bundleName);
-            if (bundle == null) {
-                throw new Exception($"Bundle not found for asset: {assetName}");
+            if (bundle == null)
+            {
+                throw new Exception($"Couldn't find {bundleName}, Did you load it?");
             }
 
             var asset = bundle.LoadAsset<T>(assetName);
-            if (bundle == null) {
-                throw new Exception($"{assetName} not found in bundle {bundleName}");
+            if (asset == null)
+            {
+                throw new Exception($"{assetName} not found in bundle");
             }
 
             return asset;

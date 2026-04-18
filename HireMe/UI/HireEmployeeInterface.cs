@@ -40,14 +40,17 @@ using ScheduleOne.UI.Phone;
 using ScheduleOne.UI.Items;
 #endif
 
-namespace HireMe.UI {
+namespace HireMe.UI
+{
 
 #if IL2CPP
     [RegisterTypeInIl2Cpp]
 #endif
-    public class HireEmployeeInterface : MonoBehaviour {
+    public class HireEmployeeInterface : MonoBehaviour
+    {
         [Serializable]
-        public class PropertyInfo {
+        public class PropertyInfo
+        {
             public string propertyName;
             public int employeeCount;
             public int employeeCapacity;
@@ -90,7 +93,8 @@ namespace HireMe.UI {
         private HashSet<Property> ownedProperties = new HashSet<Property>();
         private float cash = 20000;
 
-        public void Setup() {
+        public void Setup()
+        {
 #if IL2CPP
             InitializeExitListener();
 #elif MONO
@@ -104,42 +108,54 @@ namespace HireMe.UI {
         }
 
 #if IL2CPP
-        public void InitializeExitListener() {
-            try {
+        public void InitializeExitListener()
+        {
+            try
+            {
                 Action<ExitAction> della = this.Exit;
                 var controlledDelegate = DelegateSupport.ConvertDelegate<GameInput.ExitDelegate>(della);
                 GameInput.RegisterExitListener(controlledDelegate, 7);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 MelonLogger.Error($"Failed to register delegate: {e}");
             }
         }
 #endif
-        public void InitializeComponents() {
+        public void InitializeComponents()
+        {
             hireEmployeeCanvas = GetComponentInParent<Canvas>();
             InitializeLayoutGroups();
             InitializeButtons();
             InitializeText();
         }
 
-        public void InitializeLayoutGroups() {
+        public void InitializeLayoutGroups()
+        {
             var layouts = GetComponentsInChildren<VerticalLayoutGroup>(true);
-            foreach (VerticalLayoutGroup layout in layouts) {
-                if (layout.gameObject.name == "ScrollablePropertyContent") {
+            foreach (VerticalLayoutGroup layout in layouts)
+            {
+                if (layout.gameObject.name == "ScrollablePropertyContent")
+                {
                     scrollablePropertyContainer = layout.transform;
                     continue;
                 }
 
-                if (layout.gameObject.name == "EmployeeListingsContainer") {
+                if (layout.gameObject.name == "EmployeeListingsContainer")
+                {
                     employeeListingsContainer = layout.transform;
                     continue;
                 }
             }
         }
 
-        public void InitializeButtons() {
+        public void InitializeButtons()
+        {
             var buttons = GetComponentsInChildren<Button>(true);
-            foreach (Button button in buttons) {
-                if (button.gameObject.name == "AcceptButton") {
+            foreach (Button button in buttons)
+            {
+                if (button.gameObject.name == "AcceptButton")
+                {
                     payButton = button;
                     Text text = button.GetComponentInChildren<Text>();
                     buttonText = text.text;
@@ -149,22 +165,28 @@ namespace HireMe.UI {
             }
         }
 
-        public void InitializeOwnedProperties() {
+        public void InitializeOwnedProperties()
+        {
             ownedProperties = new HashSet<Property>(Property.OwnedProperties.ToArray());
         }
 
-        void InitializeProperties() {
-            foreach (Property property in Property.Properties) {
+        void InitializeProperties()
+        {
+            foreach (Property property in Property.Properties)
+            {
+                if (property.EmployeeCapacity <= 0) continue;
                 CreatePropertyContainer(property);
             }
         }
 
-        public (int signingFee, int rate) GetEmployeeCosts(EEmployeeType employee) {
+        public (int signingFee, int rate) GetEmployeeCosts(EEmployeeType employee)
+        {
             Employee employeePrefab = NetworkSingleton<EmployeeManager>.Instance.GetEmployeePrefab(employee);
             int signingFee = Mathf.RoundToInt(employeePrefab.SigningFee + Fixer.GetAdditionalSigningFee());
             int rate = Mathf.RoundToInt(employeePrefab.DailyWage);
 
-            switch (employee) {
+            switch (employee)
+            {
                 case EEmployeeType.Botanist:
                     if (Core.botanistDailyWage.HasValue)
                         rate = Mathf.RoundToInt((float)Core.botanistDailyWage.Value);
@@ -197,14 +219,18 @@ namespace HireMe.UI {
             return (signingFee, rate);
         }
 
-        public void InitializeEmployeeListings() {
-            try {
+        public void InitializeEmployeeListings()
+        {
+            try
+            {
                 var keys = new List<EEmployeeType>(employeeStats.Keys);
-                foreach (EEmployeeType key in keys) {
+                foreach (EEmployeeType key in keys)
+                {
                     var employeeCosts = GetEmployeeCosts(key);
                     employeeStats[key] = (0, employeeCosts.signingFee, employeeCosts.rate);
 
-                    if (key == EEmployeeType.Botanist) {
+                    if (key == EEmployeeType.Botanist)
+                    {
                         botanistListing.employeeType = key;
                         botanistListing.SetCountText(0);
                         botanistListing.SetSigningText(employeeCosts.signingFee);
@@ -212,7 +238,8 @@ namespace HireMe.UI {
                         continue;
                     }
 
-                    if (key == EEmployeeType.Chemist) {
+                    if (key == EEmployeeType.Chemist)
+                    {
                         chemistListing.employeeType = key;
                         chemistListing.SetCountText(0);
                         chemistListing.SetSigningText(employeeCosts.signingFee);
@@ -220,7 +247,8 @@ namespace HireMe.UI {
                         continue;
                     }
 
-                    if (key == EEmployeeType.Handler) {
+                    if (key == EEmployeeType.Handler)
+                    {
                         handlerListing.employeeType = key;
                         handlerListing.SetCountText(0);
                         handlerListing.SetSigningText(employeeCosts.signingFee);
@@ -228,7 +256,8 @@ namespace HireMe.UI {
                         continue;
                     }
 
-                    if (key == EEmployeeType.Cleaner) {
+                    if (key == EEmployeeType.Cleaner)
+                    {
                         cleanerListing.employeeType = key;
                         cleanerListing.SetCountText(0);
                         cleanerListing.SetSigningText(employeeCosts.signingFee);
@@ -236,28 +265,35 @@ namespace HireMe.UI {
                         continue;
                     }
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
 
                 MelonLogger.Msg(e);
             }
         }
 
-        public void InitializeText() {
+        public void InitializeText()
+        {
             var texts = GetComponentsInChildren<Text>(true);
-            foreach (Text text in texts) {
-                if (text.gameObject.name == "TotalCostLabel") {
+            foreach (Text text in texts)
+            {
+                if (text.gameObject.name == "TotalCostLabel")
+                {
                     totalCostLabel = text;
                     continue;
                 }
 
-                if (text.gameObject.name == "ErrorLabel") {
+                if (text.gameObject.name == "ErrorLabel")
+                {
                     errorLabel = text;
                     continue;
                 }
             }
         }
 
-        public void CreatePropertyContainer(Property property) {
+        public void CreatePropertyContainer(Property property)
+        {
             GameObject containerObj = Instantiate(propertyContainerPrefab, scrollablePropertyContainer);
             PropertyContainer container = containerObj.AddComponent<PropertyContainer>();
             container.currentProperty = property;
@@ -268,33 +304,38 @@ namespace HireMe.UI {
             container.UpdateCountText();
             newPropertyAssignments[property] = new List<DraggableItem>();
             propertyContainers[property] = container;
-            containerObj.SetActive(ownedProperties.Contains(property) && property.EmployeeCapacity > 0);
+            containerObj.SetActive(ownedProperties.Contains(property));
         }
 
-        public void SortProperties() {
+        public void SortProperties()
+        {
             if (scrollablePropertyContainer == null) return;
 
             List<KeyValuePair<Property, PropertyContainer>> allContainers = propertyContainers.ToList();
 
             // Sort the properties according to the specified criteria
-            allContainers.Sort((a, b) => {
+            allContainers.Sort((a, b) =>
+            {
                 PropertyContainer aContainer = a.Value;
                 PropertyContainer bContainer = b.Value;
 
                 // Primary sort: not at max capacity comes first
                 bool aAtMax = aContainer.currentProperty.Employees.Count >= aContainer.total;
                 bool bAtMax = bContainer.currentProperty.Employees.Count >= bContainer.total;
-                if (aAtMax != bAtMax) {
+                if (aAtMax != bAtMax)
+                {
                     return aAtMax ? 1 : -1;
                 }
 
                 // Secondary sort: ascending by total capacity
-                if (aContainer.total != bContainer.total) {
+                if (aContainer.total != bContainer.total)
+                {
                     return aContainer.total.CompareTo(bContainer.total);
                 }
 
                 // Tertiary sort: ascending by current employee count
-                if (aContainer.currentProperty.Employees.Count != bContainer.currentProperty.Employees.Count) {
+                if (aContainer.currentProperty.Employees.Count != bContainer.currentProperty.Employees.Count)
+                {
                     return aContainer.currentProperty.Employees.Count.CompareTo(bContainer.currentProperty.Employees.Count);
                 }
 
@@ -305,29 +346,36 @@ namespace HireMe.UI {
             });
 
             // Reorder the children in the container
-            for (int i = 0; i < allContainers.Count; i++) {
+            for (int i = 0; i < allContainers.Count; i++)
+            {
                 allContainers[i].Value.transform.SetSiblingIndex(i);
             }
         }
 
-        public void Open() {
+        public void Open()
+        {
             isMobile = true;
             showMiscUI = true;
             SetIsOpen(true);
         }
 
-        public void SetIsOpen(bool isOpen) {
+        public void SetIsOpen(bool isOpen)
+        {
             this.isOpen = isOpen;
             PlayerSingleton<PlayerCamera>.Instance.RemoveActiveUIElement(this.shopName);
-            if (isOpen) {
-                if (isMobile) {
+            if (isOpen)
+            {
+                if (isMobile)
+                {
                     Singleton<ItemUIManager>.instance.InputsContainer.gameObject.SetActive(false);
                     Singleton<GameplayMenuInterface>.instance.Close();
                     PlayerSingleton<AppsCanvas>.Instance.SetIsOpen(true);
                     PlayerSingleton<HomeScreen>.Instance.SetIsOpen(false);
                     PlayerSingleton<Phone>.Instance.SetIsHorizontal(true);
                     PlayerSingleton<Phone>.Instance.SetLookOffsetMultiplier(0.6f);
-                } else {
+                }
+                else
+                {
                     PlayerSingleton<PlayerCamera>.Instance.AddActiveUIElement(this.shopName);
                     PlayerSingleton<PlayerCamera>.Instance.FreeMouse();
                     PlayerSingleton<PlayerCamera>.Instance.SetCanLook(false);
@@ -338,7 +386,8 @@ namespace HireMe.UI {
                 }
                 cash = NetworkSingleton<MoneyManager>.Instance.cashBalance;
 
-                foreach (Property property in Property.OwnedProperties) {
+                foreach (Property property in Property.OwnedProperties)
+                {
                     if (property.EmployeeCapacity <= 0) continue;
                     if (!propertyContainers.ContainsKey(property)) continue;
 
@@ -350,35 +399,37 @@ namespace HireMe.UI {
                     if (!ownedProperties.Contains(property)) ownedProperties.Add(property);
                     if (!container.gameObject.activeInHierarchy) container.gameObject.SetActive(true);
 
-                    if (newPropertyAssignments.ContainsKey(container.currentProperty)) {
+                    if (newPropertyAssignments.ContainsKey(container.currentProperty))
+                    {
                         container.employees = newPropertyAssignments[container.currentProperty].Count;
                     }
 
                     container.total = property.EmployeeCapacity;
                     container.UpdateCountText();
-                    if (container.currentProperty.Employees.Count >= container.total) {
-                        container.ShrinkContainer();
-                    } else {
-                        container.ExpandContainer();
-                    }
                 }
 
                 SortProperties();
                 RefreshUI();
-            } else {
-                if (isMobile) {
+            }
+            else
+            {
+                if (isMobile)
+                {
                     isMobile = false;
                     PlayerSingleton<AppsCanvas>.Instance.SetIsOpen(false);
                     PlayerSingleton<HomeScreen>.Instance.SetIsOpen(true);
                     PlayerSingleton<Phone>.Instance.SetIsHorizontal(false);
                     PlayerSingleton<Phone>.Instance.SetLookOffsetMultiplier(1f);
                     Singleton<CursorManager>.Instance.SetCursorAppearance(CursorManager.ECursorType.Default);
-                    if (showMiscUI) {
+                    if (showMiscUI)
+                    {
                         Singleton<ItemUIManager>.instance.InputsContainer.gameObject.SetActive(false);
                         Singleton<GameplayMenuInterface>.instance.Open();
                     }
                     //onClose?.Invoke();
-                } else {
+                }
+                else
+                {
                     PlayerSingleton<PlayerCamera>.Instance.LockMouse();
                     PlayerSingleton<PlayerCamera>.Instance.SetCanLook(true);
                     PlayerSingleton<PlayerMovement>.Instance.CanMove = true;
@@ -391,14 +442,19 @@ namespace HireMe.UI {
             hireEmployeeCanvas.gameObject.SetActive(isOpen);
         }
 
-        public void LoadCurrentEmployees(Property property) {
+        public void LoadCurrentEmployees(Property property)
+        {
             PropertyContainer container = propertyContainers[property];
             if (container == null) return;
-            foreach (Employee emp in property.Employees) {
+            foreach (Employee emp in property.Employees)
+            {
                 if (emp == null) continue;
-                if (newPropertyAssignments[property].Any(item => (item.currentEmployee.fullName == emp.fullName && item.currentEmployee.EmployeeType == emp.EmployeeType))) continue;
+                if (newPropertyAssignments[property].Any(item => item.currentEmployee != null &&
+                                                         item.currentEmployee.fullName == emp.fullName &&
+                                                         item.currentEmployee.EmployeeType == emp.EmployeeType)) continue;
                 GameObject go = null;
-                switch (emp.Type) {
+                switch (emp.Type)
+                {
                     case EEmployeeType.Botanist:
                         go = GameObject.Instantiate(botanistListing.employeePrefab, container.employeeContainer);
                         break;
@@ -416,23 +472,29 @@ namespace HireMe.UI {
                 draggable.employeeType = emp.Type;
                 draggable.currentEmployee = emp;
                 draggable.currentContainer = container;
+                draggable.SetNameLabel(emp.fullName);
                 newPropertyAssignments[property].Add(draggable);
             }
         }
 
-        public void Exit(ExitAction action) {
-            if (action.Used) {
+        public void Exit(ExitAction action)
+        {
+            if (action.Used)
+            {
                 return;
             }
-            if (this.isOpen) {
+            if (this.isOpen)
+            {
                 action.Used = true;
                 this.SetIsOpen(false);
             }
         }
 
-        private void UpdateEmployeeListingCount(EEmployeeType employeeType) {
+        private void UpdateEmployeeListingCount(EEmployeeType employeeType)
+        {
             int count = employeeStats[employeeType].count;
-            switch (employeeType) {
+            switch (employeeType)
+            {
                 case EEmployeeType.Botanist:
                     botanistListing.SetCountText(count);
                     break;
@@ -448,17 +510,20 @@ namespace HireMe.UI {
             }
         }
 
-        public void OnNewEmployeeDropped(DraggableItem newEmployee, PropertyContainer targetContainer) {
+        public void OnNewEmployeeDropped(DraggableItem newEmployee, PropertyContainer targetContainer)
+        {
             newEmployee.currentContainer = targetContainer;
             OnEmployeeAssigned(newEmployee.employeeType, targetContainer.currentProperty, newEmployee);
             targetContainer.employees += 1;
             targetContainer.UpdateCountText();
         }
 
-        public void OnEmployeeMoved(DraggableItem item, PropertyContainer targetContainer) {
+        public void OnEmployeeMoved(DraggableItem item, PropertyContainer targetContainer)
+        {
             var previousContainer = item.currentContainer;
             if (previousContainer == targetContainer) return;
-            if (!item.newlySpawned && !payButton.interactable) {
+            if (!item.newlySpawned && !payButton.interactable)
+            {
                 locationChanged = true;
             }
 
@@ -472,8 +537,10 @@ namespace HireMe.UI {
             OnEmployeeAssigned(item.employeeType, targetContainer.currentProperty, item);
         }
 
-        public void OnEmployeeAssigned(EEmployeeType employeeType, Property curr, DraggableItem instance) {
-            if (instance.newlySpawned) {
+        public void OnEmployeeAssigned(EEmployeeType employeeType, Property curr, DraggableItem instance)
+        {
+            if (instance.newlySpawned)
+            {
                 employeeStats[employeeType] = (employeeStats[employeeType].count + 1, employeeStats[employeeType].signingFee, employeeStats[employeeType].rate);
             }
             newPropertyAssignments[curr].Add(instance);
@@ -481,18 +548,22 @@ namespace HireMe.UI {
             RefreshUI();
         }
 
-        public bool OnEmployeeRemoved(Property curr, DraggableItem instance) {
+        public bool OnEmployeeRemoved(Property curr, DraggableItem instance)
+        {
 
             EEmployeeType employeeType = instance.employeeType;
             bool success = false;
-            if (instance.newlySpawned) {
+            if (instance.newlySpawned)
+            {
                 employeeStats[employeeType] = (employeeStats[employeeType].count - 1, employeeStats[employeeType].signingFee, employeeStats[employeeType].rate);
             }
-            if (newPropertyAssignments.ContainsKey(curr)) {
+            if (newPropertyAssignments.ContainsKey(curr))
+            {
                 success = newPropertyAssignments[curr].Remove(instance);
             }
 
-            if (success) {
+            if (success)
+            {
                 UpdateEmployeeListingCount(employeeType);
                 RefreshUI();
             }
@@ -501,7 +572,8 @@ namespace HireMe.UI {
 
         }
 
-        void RefreshUI() {
+        void RefreshUI()
+        {
             int total = GetTotalCost();
             bool overBudget = total > cash;
             string textColor = !overBudget ? "#000000" : "#FF0004";
@@ -514,12 +586,16 @@ namespace HireMe.UI {
             payButton.interactable = !overBudget && (total > 0 || locationChanged);
         }
 
-        public int GetNewEmployees() {
+        public int GetNewEmployees()
+        {
             int count = 0;
-            foreach (var kvp in newPropertyAssignments) {
+            foreach (var kvp in newPropertyAssignments)
+            {
                 var list = kvp.Value;
-                foreach (var employee in list) {
-                    if (employee.newlySpawned) {
+                foreach (var employee in list)
+                {
+                    if (employee.newlySpawned)
+                    {
                         count++;
                     }
                 }
@@ -528,9 +604,11 @@ namespace HireMe.UI {
             return count;
         }
 
-        public int GetTotalCost() {
+        public int GetTotalCost()
+        {
             int total = 0;
-            foreach (var kvp in employeeStats) {
+            foreach (var kvp in employeeStats)
+            {
                 int subtotal = kvp.Value.count * kvp.Value.signingFee;
                 total += subtotal;
             }
@@ -552,11 +630,12 @@ namespace HireMe.UI {
 #if IL2CPP
             MelonCoroutines.Start(HandlePaymentRoutine());
 #else
-    StartCoroutine(HandlePaymentRoutine());
+            StartCoroutine(HandlePaymentRoutine());
 #endif
         }
 
-        public void HandlePaymentComplete() {
+        public void HandlePaymentComplete()
+        {
             isHandlingPayment = false;
             Text payButtonText = payButton.GetComponentInChildren<Text>();
             payButtonText.text = buttonText;
@@ -578,15 +657,18 @@ namespace HireMe.UI {
 #if IL2CPP
         [HideFromIl2Cpp]
 #endif
-        public IEnumerator HandlePaymentRoutine() {
-            if (payButton == null) { 
+        public IEnumerator HandlePaymentRoutine()
+        {
+            if (payButton == null)
+            {
                 MelonLogger.Error("payButton is null.");
                 HandlePaymentComplete();
                 yield break;
             }
 
             var payButtonText = payButton.GetComponentInChildren<Text>();
-            if (payButtonText == null) { 
+            if (payButtonText == null)
+            {
                 MelonLogger.Error("payButtonText is null.");
                 HandlePaymentComplete();
                 yield break;
@@ -601,7 +683,7 @@ namespace HireMe.UI {
 #if IL2CPP
             MelonCoroutines.Start(HireEmployeesRoutine());
 #else
-    StartCoroutine(HireEmployeesRoutine());
+            StartCoroutine(HireEmployeesRoutine());
 #endif
 
             while (!_isHiringDone)
@@ -612,22 +694,28 @@ namespace HireMe.UI {
                 yield return new WaitForSeconds(interval);
             }
 
-            foreach (var kvp in newPropertyAssignments) {
+            foreach (var kvp in newPropertyAssignments)
+            {
                 var list = kvp.Value;
 
                 List<(int index, GameObject go)> temp = new List<(int index, GameObject go)>();
 
-                for (int i = 0; i < list.Count; i++) {
+                for (int i = 0; i < list.Count; i++)
+                {
                     DraggableItem item = list[i];
                     if (!item.newlySpawned) continue;
-                    if (item != null && item.gameObject != null) {
+                    if (item != null && item.gameObject != null)
+                    {
                         temp.Add((i, item.gameObject));
-                    } else {
+                    }
+                    else
+                    {
                         MelonLogger.Warning("Tried to destroy null item or item.gameObject.");
                     }
                 }
 
-                for (var j = temp.Count - 1; j >= 0; j--) {
+                for (var j = temp.Count - 1; j >= 0; j--)
+                {
                     list.RemoveAt(temp[j].index);
                     GameObject.Destroy(temp[j].go);
                 }
@@ -641,18 +729,23 @@ namespace HireMe.UI {
 #if IL2CPP
         [HideFromIl2Cpp]
 #endif
-        private IEnumerator HireEmployeesRoutine() {
-            if (!NetworkSingleton<VariableDatabase>.Instance.GetValue<bool>("ClipboardAcquired")) {
+        private IEnumerator HireEmployeesRoutine()
+        {
+            if (!NetworkSingleton<VariableDatabase>.Instance.GetValue<bool>("ClipboardAcquired"))
+            {
                 NetworkSingleton<VariableDatabase>.Instance.SetVariableValue("ClipboardAcquired", true.ToString(), true);
             }
 
-            foreach (var kvp in newPropertyAssignments) {
+            foreach (var kvp in newPropertyAssignments)
+            {
                 Property property = kvp.Key;
                 List<DraggableItem> employees = kvp.Value;
 
-                foreach (var employee in employees) {
+                foreach (var employee in employees)
+                {
                     if (employee == null) continue;
-                    if (employee.newlySpawned) {
+                    if (employee.newlySpawned)
+                    {
                         var type = employee.employeeType;
                         var stats = employeeStats[type];
                         int totalFee = stats.signingFee;
@@ -661,7 +754,8 @@ namespace HireMe.UI {
                         NetworkSingleton<EmployeeManager>.Instance.CreateNewEmployee(property, type);
                         continue;
                     }
-                    if (property.PropertyCode != employee.currentEmployee.AssignedProperty.PropertyCode) {
+                    if (property.PropertyCode != employee.currentEmployee.AssignedProperty.PropertyCode)
+                    {
                         MelonLogger.Msg($"{property.PropertyCode} | {employee.currentEmployee.AssignedProperty.PropertyCode}");
                         employee.currentEmployee.SendTransfer(property.PropertyCode);
                     }
@@ -672,8 +766,10 @@ namespace HireMe.UI {
             _isHiringDone = true;
         }
 
-        void Update() {
-            if (Input.GetKeyDown(KeyCode.Tab) && isOpen) {
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Tab) && isOpen)
+            {
                 showMiscUI = false;
                 SetIsOpen(false);
             }

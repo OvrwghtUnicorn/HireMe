@@ -1,11 +1,6 @@
 ﻿using HireMe.TemplateUtils;
 using HireMe.Utils;
 using MelonLoader;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -49,6 +44,7 @@ namespace HireMe.UI {
         public static Sprite collapseIcon;
         public static Sprite deleteIcon;
         public static Sprite appIcon;
+        public static GameObject nameLabelPrefab;
 
         public static HireEmployeeInterface hiringInterface;
         public static Button appButton;
@@ -119,15 +115,69 @@ namespace HireMe.UI {
                     deleteIcon = AssetBundleUtils.LoadAssetFromBundle<Sprite>("deletebutton.png", ASSET_BUNDLE_NAME);
                 if (appIcon == null)
                     appIcon = AssetBundleUtils.LoadAssetFromBundle<Sprite>("appicon.png", ASSET_BUNDLE_NAME);
+
+                if (nameLabelPrefab == null)
+                    nameLabelPrefab = CreateNameLabelPrefab();
             } catch (Exception e) {
                 mod.Unregister($"Unregistering mod due to error:\n {e.Source}\n {e.Message}");
             }
         }
 
+        /// <summary>
+        /// Builds the name label prefab once at load time so every DraggableItem
+        /// can instantiate a fully constructed copy with a guaranteed RectTransform.
+        /// </summary>
+        private static GameObject CreateNameLabelPrefab() {
+            // Root — background bar
+            GameObject root = new GameObject("NameLabelPrefab");
+            RectTransform rootRt = root.AddComponent<RectTransform>();
+            rootRt.anchorMin = new Vector2(0f, 0f);
+            rootRt.anchorMax = new Vector2(1f, 0f);
+            rootRt.pivot = new Vector2(0.5f, 0f);
+            rootRt.sizeDelta = new Vector2(0f, 28f);
+            rootRt.anchoredPosition = Vector2.zero;
+
+            Image bg = root.AddComponent<Image>();
+            bg.color = new Color(0f, 0f, 0f, 0.6f);
+            bg.raycastTarget = false;
+
+            // Child — text
+            GameObject textGo = new GameObject("Text");
+            textGo.transform.SetParent(root.transform, false);
+
+            RectTransform textRt = textGo.AddComponent<RectTransform>();
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.sizeDelta = Vector2.zero;
+            textRt.anchoredPosition = Vector2.zero;
+
+            Text text = textGo.AddComponent<Text>();
+            text.fontSize = 14;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.color = Color.white;
+            text.raycastTarget = false;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+            root.SetActive(false); // hidden until SetNameLabel is called
+            GameObject.DontDestroyOnLoad(root);
+            return root;
+        }
+
         public static void SetupUI(Transform parent) {
-            GameObject temp = GameObject.Instantiate(hireEmployeeUIPrefab,parent);
+            GameObject temp = GameObject.Instantiate(hireEmployeeUIPrefab, parent);
             hiringInterface = temp.transform.GetChild(0).gameObject.AddComponent<HireEmployeeInterface>();
             hiringInterface.propertyContainerPrefab = propertyContainerPrefab;
+
+            // Configure the scroll rect once here rather than scaling every event.
+            ScrollRect scrollRect = temp.GetComponentInChildren<ScrollRect>(true);
+            if (scrollRect != null) {
+                scrollRect.scrollSensitivity = 20f;
+                scrollRect.inertia = true;
+                scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            }
+
             // assign popup handler
             Transform errorPopupTransform = temp.transform.Find("HireEmployeeInterface/PopupBackground");
             if (errorPopupTransform != null) {

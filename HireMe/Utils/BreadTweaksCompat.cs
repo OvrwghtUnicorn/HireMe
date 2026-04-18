@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using MelonLoader;
+﻿using MelonLoader;
 using MelonLoader.Utils;
 
 namespace HireMe.TemplateUtils {

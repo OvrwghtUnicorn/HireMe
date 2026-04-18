@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 #if IL2CPP
 using Il2CppInterop.Runtime;
@@ -41,6 +42,23 @@ namespace HireMe.UI {
                 _trigger.triggers = new List<EventTrigger.Entry>();
 #endif
 
+            // Forward scroll events up to the nearest ScrollRect so the
+            // EventTrigger component doesn't swallow them.
+            AddTrigger(EventTriggerType.Scroll, (UnityAction<BaseEventData>)ForwardScroll);
+        }
+
+        private void ForwardScroll(BaseEventData rawData) {
+#if IL2CPP
+            PointerEventData eventData = rawData.TryCast<PointerEventData>();
+#elif MONO
+            PointerEventData eventData = rawData as PointerEventData;
+#endif
+            if (eventData == null) return;
+
+            ScrollRect scrollRect = GetComponentInParent<ScrollRect>();
+            if (scrollRect == null) return;
+
+            scrollRect.OnScroll(eventData);
         }
 
         protected void AddTrigger(EventTriggerType type, UnityAction<BaseEventData> action) {

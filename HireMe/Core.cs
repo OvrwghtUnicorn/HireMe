@@ -1,13 +1,9 @@
 ﻿using MelonLoader;
 using UnityEngine;
-using MelonLoader.Utils;
 using HireMe.TemplateUtils;
 using HireMe.UI;
 using HireMe.Utils;
 using UnityEngine.Events;
-using UnityEngine.UI;
-using ModManagerPhoneApp;
-
 
 
 #if IL2CPP
@@ -23,11 +19,6 @@ using ScheduleOne.DevUtilities;
 [assembly: MelonInfo(typeof(HireMe.Core), HireMe.BuildInfo.Name, HireMe.BuildInfo.Version, HireMe.BuildInfo.Author, HireMe.BuildInfo.DownloadLink)]
 [assembly: MelonColor(255, 191, 0, 255)]
 [assembly: MelonGame("TVGS", "Schedule I")]
-#if IL2CPP
-[assembly: MelonOptionalDependencies("ModManager&PhoneApp")]
-#elif MONO
-[assembly: MelonOptionalDependencies("ModManagerPhoneApp")]
-#endif
 
 namespace HireMe {
     public static class BuildInfo {
@@ -35,7 +26,7 @@ namespace HireMe {
         public const string Description = "A user interface for hiring employees";
         public const string Author = "OverweightUnicorn";
         public const string Company = "UnicornsCanMod";
-        public const string Version = "2.1.0";
+        public const string Version = "2.2.0";
         public const string DownloadLink = null;
     }
     public class Core : MelonMod {
@@ -56,24 +47,10 @@ namespace HireMe {
         public static bool? cleanerSigningFeeEnabled;
         public static double? cleanerDailyWage;
 
-        private static bool _modManagerFound = false;
-
         public override void OnInitializeMelon() {
             ModSettings.Init();
+            AssetBundleUtils.Initialize(this);
             LoggerInstance.Msg($"PhoneApp: {ModSettings.EnablePhoneApp.Value}");
-
-            // --- Check for Mod Manager Registration ---
-            try {
-                // Replace "Mod Manager & Phone App" with the EXACT MelonInfo name
-                _modManagerFound = MelonBase.RegisteredMelons.Any(mod => mod?.Info?.Name == "Mod Manager & Phone App");
-                if (_modManagerFound) {
-                    LoggerInstance.Msg("Mod Manager found. Attempting event subscription...");
-                    SubscribeToModManagerEvents(); // Call helper
-                } else { LoggerInstance.Warning("Mod Manager not found. Skipping event subscription."); }
-            } catch (Exception ex) { LoggerInstance.Error($"Error checking RegisteredMelons: {ex}"); _modManagerFound = false; }
-            // --- End Check ---
-
-            LoggerInstance.Msg("MyCoolMod Initialization complete.");
         }
 
         public override void OnLateInitializeMelon() {
@@ -93,50 +70,6 @@ namespace HireMe {
             if (homeScreen) {
                 UIManager.SetupPhoneApp(homeScreen);
             }
-        }
-
-        private void SubscribeToModManagerEvents() {
-            try {
-#if IL2CPP
-
-                ModManagerPhoneApp.ModSettingsEvents.OnPhonePreferencesSaved += HandleSettingsUpdate;
-#elif MONO
-                ModManagerPhoneApp.ModSettingsEvents.OnPreferencesSaved += HandleSettingsUpdate;
-#endif
-                // ModManagerPhoneApp.ModSettingsEvents.OnMenuPreferencesSaved += HandleSettingsUpdate;
-                LoggerInstance.Msg("Successfully subscribed to Mod Manager save events.");
-            }
-            // Catch potential runtime errors even if mod was registered
-            catch (TypeLoadException) { LoggerInstance.Error("TypeLoadException during subscription! Mod Manager incompatible?"); _modManagerFound = false; } catch (Exception ex) { LoggerInstance.Error($"Unexpected error during subscription: {ex}"); _modManagerFound = false; }
-        }
-
-        private void HandleSettingsUpdate() // Can be static if it only accesses static fields/methods
-        {
-            // Use LoggerInstance if non-static, or Melon<MyCoolMod>.Logger if static
-            LoggerInstance.Msg("Mod Manager saved preferences. Reloading settings...");
-            try {
-                bool newPhoneAppValue = ModSettings.EnablePhoneApp.Value;
-                MelonLogger.Msg("EnablePhoneApp: " + newPhoneAppValue);
-                UIManager.TogglePhoneApp(newPhoneAppValue);
-
-                LoggerInstance.Msg("Settings reloaded successfully.");
-            } catch (System.Exception ex) { LoggerInstance.Error($"Error applying updated settings after save: {ex}"); }
-        }
-
-        private void UnsubscribeFromModManagerEvents() {
-            try {
-#if IL2CPP
-
-                ModManagerPhoneApp.ModSettingsEvents.OnPhonePreferencesSaved -= HandleSettingsUpdate;
-#elif MONO
-                ModManagerPhoneApp.ModSettingsEvents.OnPreferencesSaved -= HandleSettingsUpdate;
-#endif
-                LoggerInstance.Msg("Unsubscribed from Mod Manager events.");
-            } catch (Exception ex) { LoggerInstance.Warning($"Ignoring error during unsubscribe: {ex.Message}"); }
-        }
-
-        public override void OnDeinitializeMelon() {
-            if (_modManagerFound) { UnsubscribeFromModManagerEvents(); }
         }
 
         public void LoadBreadConfig() {
